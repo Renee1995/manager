@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manager.dao.sys.UserDao">
+    <resultMap id="BaseResultMap" type="UserDTO">
+        <id     column="id"                 property="id"/>
+        <result column="username"           property="username"/>
+        <result column="password"           property="password"/>
+        <result column="phone"              property="phone"/>
+        <result column="realname"           property="realname"/>
+        <result column="sex"                property="sex"/>
+        <result column="email"              property="email"/>
+        <result column="head_image"         property="headImage"/>
+        <result column="introduction"       property="introduction"/>
+        <result column="is_enable"          property="isEnable"/>
+        <result column="is_remove"          property="isRemove"/>
+        <result column="create_time"        property="createTime"/>
+        <result column="update_time"        property="updateTime"/>
+        <result column="create_id"          property="createId"/>
+        <result column="update_id"          property="updateId"/>
+        <collection property="roles" ofType="Role">
+            <id column="r_id" property="id"/>
+            <result column="r_role_name"  property="roleName"/>
+        </collection>
+    </resultMap>
+
+    <select id="getUserDTOByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+            tsu.id, tsu.username, tsu.password, tsu.phone, tsu.realname, tsu.sex, tsu.email, tsu.head_image, tsu.introduction,
+            tsu.is_enable, tsu.is_remove, tsu.create_time, tsu.update_time, tsu.create_id, tsu.update_id,
+            tsr.id r_id,tsr.role_name r_role_name
+        from
+            t_sys_user tsu LEFT JOIN t_sys_user_role tsur on tsu.id= tsur.user_id
+            LEFT JOIN t_sys_role tsr on tsur.role_id=tsr.id
+        where
+            tsu.username= #{username}
+            and tsu.is_remove = 0
+    </select>
+
+</mapper>

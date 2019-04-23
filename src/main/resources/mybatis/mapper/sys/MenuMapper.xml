@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manager.dao.sys.MenuDao">
+    <resultMap id="BaseResultMap" type="MenuDTO">
+        <id     column="id"                 property="id"/>
+        <result column="menu_name"          property="menuName"/>
+        <result column="menu_url"           property="menuUrl"/>
+        <result column="parent_id"          property="parentId"/>
+        <result column="menu_level"         property="menuLevel"/>
+        <result column="sort"               property="sort"/>
+        <result column="icon"               property="icon"/>
+        <result column="menu_describe"      property="menuDescribe"/>
+        <result column="is_enable"          property="isEnable"/>
+        <result column="create_time"        property="createTime"/>
+        <collection property="children" ofType="Menu" column="{role_id=role_id,parent_id=id}" select="getChildren" >
+        </collection>
+    </resultMap>
+    <sql id="Base_Column_List">
+        TSM.id, TSM.menu_name, TSM.menu_url, TSM.parent_id, TSM.menu_level, TSM.sort, TSM.icon, TSM.menu_describe,
+        TSM.create_time
+    </sql>
+    <select id="getUserMenuList" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+          <include refid="Base_Column_List"/>,TSR.id role_id
+        from
+            t_sys_user TSU join t_sys_user_role TSUR on TSU.id = TSUR.user_id
+            join t_sys_role TSR on TSUR.role_id = TSR.id and TSR.is_remove = 0
+            join t_sys_role_menu TSRM on TSR.id = TSRM.role_id
+            join t_sys_menu TSM on TSM.id = TSRM.menu_id and TSM.menu_level = 1 and TSM.is_remove = 0
+        where
+            TSU.id = #{userId}
+        and
+            TSU.is_remove = 0
+        Order by TSM.sort
+    </select>
+    <select id="getChildren" resultType="Menu">
+        select
+            TSM.id, TSM.menu_name menuName, TSM.menu_url menuUrl, TSM.parent_id parentId, TSM.menu_level menuLevel,
+            TSM.sort, TSM.icon, TSM.menu_describe menuDescribe,
+            TSM.create_time createTime
+        from
+            t_sys_role TSR join t_sys_role_menu TSRM on TSR.id = TSRM.role_id
+            join t_sys_menu TSM on TSM.id = TSRM.menu_id and TSM.menu_level = 2 and TSM.is_remove = 0
+        where
+            TSR.id = #{role_id}
+        and
+            TSR.is_remove = 0
+        and
+            TSM.parent_id = #{parent_id}
+        Order by TSM.sort
+    </select>
+</mapper>
